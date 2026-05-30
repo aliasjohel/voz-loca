@@ -72,3 +72,19 @@ btnBorrar.addEventListener("click", () => {
     estado.textContent = "Audio borrado. Listo para grabar otro.";
     btnBorrar.disabled = true;
 });
+
+// =========================
+// REGISTRO DEL SERVICE WORKER
+// =========================
+
+if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js")
+            .then(() => {
+                console.log("Service Worker registrado");
+            })
+            .catch((error) => {
+                console.error("Error al registrar SW:", error);
+            });
+    });
+}

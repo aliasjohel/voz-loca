@@ -1,0 +1,10 @@
+{
+  "name": "Voz Loca",
+  "short_name": "Voz Loca",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#22c55e",
+  "orientation": "portrait",
+  "icons": []
+}
