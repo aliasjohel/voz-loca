@@ -1,0 +1,85 @@
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+}
+
+/* ==========================================================================
+   Contenedor principal
+   ========================================================================== */
+
+.app {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   Tipografia
+   ========================================================================== */
+
+h1 {
+    color: #222;
+}
+
+p {
+    color: #555;
+}
+
+/* ==========================================================================
+   Controles
+   ========================================================================== */
+
+.controls {
+    margin: 20px 0;
+}
+
+button {
+    border: none;
+    padding: 14px 18px;
+    margin: 5px;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Acciones principales de grabacion y detencion. */
+#btnGrabar {
+    background: #22c55e;
+    color: white;
+}
+
+#btnDetener {
+    background: #ef4444;
+    color: white;
+}
+
+/* Estado visual para controles no disponibles. */
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ==========================================================================
+   Reproductor
+   ========================================================================== */
+
+audio {
+    width: 100%;
+    margin-top: 20px;
+}
+
+/* Accion secundaria para descartar el audio actual. */
+#btnBorrar {
+    background: #6b7280;
+    color: white;
+}
