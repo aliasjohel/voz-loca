@@ -1,10 +1,13 @@
-const CACHE_NAME = "voz-loca-v1";
+const CACHE_NAME = "voz-loca-v2";
 
 const FILES_TO_CACHE = [
   "./",
   "./index.html",
+  "./manifest.json",
   "./css/styles.css",
-  "./js/app.js"
+  "./js/app.js",
+  "./assets/icons/icon-192.png",
+  "./assets/icons/icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
