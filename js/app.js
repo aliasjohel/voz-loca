@@ -289,18 +289,67 @@ btnAnciano.addEventListener("click", async () => {
     }
 });
 
-// =========================
-// REGISTRO DEL SERVICE WORKER
-// =========================
+// ============================================================================
+// Registro y actualizacion del Service Worker
+// ============================================================================
+
+function mostrarAvisoDeActualizacion(worker) {
+    const updateNotice = document.getElementById("updateNotice");
+    const btnActualizarApp = document.getElementById("btnActualizarApp");
+
+    if (!updateNotice || !btnActualizarApp) {
+        return;
+    }
+
+    updateNotice.hidden = false;
+
+    btnActualizarApp.onclick = () => {
+        worker.postMessage({ type: "SKIP_WAITING" });
+    };
+}
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js")
-            .then(() => {
+            .then((registration) => {
                 console.log("Service Worker registrado");
+
+                if (registration.waiting) {
+                    mostrarAvisoDeActualizacion(registration.waiting);
+                }
+
+                registration.addEventListener("updatefound", () => {
+                    const newWorker = registration.installing;
+
+                    if (!newWorker) {
+                        return;
+                    }
+
+                    newWorker.addEventListener("statechange", () => {
+                        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+                            mostrarAvisoDeActualizacion(newWorker);
+                        }
+                    });
+                });
+
+                registration.update();
+                setInterval(() => {
+                    registration.update();
+                }, 60 * 60 * 1000);
             })
             .catch((error) => {
                 console.error("Error al registrar SW:", error);
             });
+    });
+
+    let actualizacionAplicada = false;
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (actualizacionAplicada) {
+            return;
+        }
+
+        actualizacionAplicada = true;
+        window.location.reload();
     });
 }

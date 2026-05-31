@@ -106,3 +106,42 @@ audio {
     width: 100%;
     margin-top: 15px;
 }
+
+/* ==========================================================================
+   Aviso de actualizacion
+   ========================================================================== */
+
+.update-notice {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 12px 14px;
+    color: white;
+    background: #111827;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.update-notice[hidden] {
+    display: none;
+}
+
+.update-notice span {
+    color: white;
+    font-size: 14px;
+}
+
+#btnActualizarApp {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    margin: 0;
+    color: white;
+    background: #22c55e;
+}
