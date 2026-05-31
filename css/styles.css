@@ -83,3 +83,26 @@ audio {
     background: #6b7280;
     color: white;
 }
+
+/* ==========================================================================
+   Efectos de voz
+   ========================================================================== */
+
+.effects {
+    margin-top: 25px;
+}
+
+#btnArdilla {
+    background: #a855f7;
+    color: white;
+}
+
+#btnAnciano {
+    background: #f59e0b;
+    color: white;
+}
+
+#audioEfecto {
+    width: 100%;
+    margin-top: 15px;
+}
