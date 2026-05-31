@@ -102,7 +102,7 @@ btnArdilla.addEventListener("click", async () => {
         const audioContext = new AudioContext();
         const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
-        const pitchRate = 1.45;
+        const pitchRate = 1.78;
 
         const offlineContext = new OfflineAudioContext(
             audioBuffer.numberOfChannels,
@@ -113,18 +113,58 @@ btnArdilla.addEventListener("click", async () => {
         const source = offlineContext.createBufferSource();
         source.buffer = audioBuffer;
 
-        // Sube el tono y acelera un poco la voz
+        // Sube el tono sin acelerar demasiado el audio.
         source.playbackRate.value = pitchRate;
 
-        // Filtro para dar brillo al efecto
-        const filter = offlineContext.createBiquadFilter();
-        filter.type = "highshelf";
-        filter.frequency.value = 2500;
-        filter.gain.value = 8;
+        // Pequeña variacion de tono para que no conserve tanto el timbre original.
+        const vibrato = offlineContext.createOscillator();
+        vibrato.frequency.value = 9.5;
 
-        source.connect(filter);
-        filter.connect(offlineContext.destination);
+        const vibratoDepth = offlineContext.createGain();
+        vibratoDepth.gain.value = 22;
 
+        vibrato.connect(vibratoDepth);
+        vibratoDepth.connect(source.detune);
+
+        // Recorta graves para que la voz quede mas finita.
+        const highpass = offlineContext.createBiquadFilter();
+        highpass.type = "highpass";
+        highpass.frequency.value = 720;
+
+        // Refuerza la zona nasal y de presencia propia del efecto ardilla.
+        const nasal = offlineContext.createBiquadFilter();
+        nasal.type = "peaking";
+        nasal.frequency.value = 2500;
+        nasal.Q.value = 2.1;
+        nasal.gain.value = 13;
+
+        const thinVoice = offlineContext.createBiquadFilter();
+        thinVoice.type = "peaking";
+        thinVoice.frequency.value = 3600;
+        thinVoice.Q.value = 1.6;
+        thinVoice.gain.value = 8;
+
+        // Agrega brillo para que el resultado sea mas caricaturesco.
+        const sparkle = offlineContext.createBiquadFilter();
+        sparkle.type = "highshelf";
+        sparkle.frequency.value = 4200;
+        sparkle.gain.value = 16;
+
+        const compressor = offlineContext.createDynamicsCompressor();
+        compressor.threshold.value = -24;
+        compressor.knee.value = 18;
+        compressor.ratio.value = 3;
+        compressor.attack.value = 0.004;
+        compressor.release.value = 0.18;
+
+        source.connect(highpass);
+        highpass.connect(nasal);
+        nasal.connect(thinVoice);
+        thinVoice.connect(sparkle);
+        sparkle.connect(compressor);
+        compressor.connect(offlineContext.destination);
+
+        vibrato.start(0);
         source.start(0);
 
         const renderedBuffer = await offlineContext.startRendering();
