@@ -104,7 +104,7 @@ btnArdilla.addEventListener("click", async () => {
 
         const offlineContext = new OfflineAudioContext(
             audioBuffer.numberOfChannels,
-            audioBuffer.length / 1.55,
+            audioBuffer.length / 1.48,
             audioBuffer.sampleRate
         );
 
@@ -112,7 +112,7 @@ btnArdilla.addEventListener("click", async () => {
         source.buffer = audioBuffer;
 
         // Sube el tono sin acelerar demasiado el audio.
-        source.playbackRate.value = 1.55;
+        source.playbackRate.value = 1.48;
 
         // Filtro para dar brillo al efecto.
         const filter = offlineContext.createBiquadFilter();
