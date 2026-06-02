@@ -248,7 +248,7 @@ btnAnciano.addEventListener("click", async () => {
         vibrato.frequency.value = 3.4;
 
         const vibratoDepth = offlineContext.createGain();
-        vibratoDepth.gain.value = 18;
+        vibratoDepth.gain.value = 8;
 
         vibrato.connect(vibratoDepth);
         vibratoDepth.connect(source.detune);
@@ -261,7 +261,7 @@ btnAnciano.addEventListener("click", async () => {
         oscillator.frequency.value = 2.6;
 
         const tremoloDepth = offlineContext.createGain();
-        tremoloDepth.gain.value = 0.045;
+        tremoloDepth.gain.value = 0.002;
 
         oscillator.connect(tremoloDepth);
         tremoloDepth.connect(tremolo.gain);
