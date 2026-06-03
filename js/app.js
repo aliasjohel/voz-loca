@@ -17,8 +17,10 @@ const btnBorrar = document.getElementById("btnBorrar");
 const btnArdilla = document.getElementById("btnArdilla");
 const audioEfecto = document.getElementById("audioEfecto");
 const btnAnciano = document.getElementById("btnAnciano");
+const btnCompartir = document.getElementById("btnCompartir");
 
 let audioBlobActual = null;
+let audioProcesadoActual = null;
 
 // ============================================================================
 // Flujo de grabacion
@@ -77,6 +79,8 @@ btnBorrar.addEventListener("click", () => {
     audioEfecto.src = "";
     audioChunks = [];
     audioBlobActual = null;
+    audioProcesadoActual = null;
+    btnCompartir.disabled = true;
 
     estado.textContent = "Audio borrado. Listo para grabar otro.";
     btnBorrar.disabled = true;
@@ -127,6 +131,8 @@ btnArdilla.addEventListener("click", async () => {
 
         const renderedBuffer = await offlineContext.startRendering();
         const wavBlob = audioBufferToWav(renderedBuffer);
+        audioProcesadoActual = wavBlob;
+        btnCompartir.disabled = false;
         const audioUrl = URL.createObjectURL(wavBlob);
 
         audioEfecto.src = audioUrl;
@@ -278,6 +284,8 @@ btnAnciano.addEventListener("click", async () => {
 
         const renderedBuffer = await offlineContext.startRendering();
         const wavBlob = audioBufferToWav(renderedBuffer);
+        audioProcesadoActual = wavBlob;
+        btnCompartir.disabled = false;
 
         audioEfecto.src = URL.createObjectURL(wavBlob);
         estado.textContent = "Efecto anciano listo.";
@@ -285,6 +293,48 @@ btnAnciano.addEventListener("click", async () => {
         console.error(error);
         estado.textContent = "No se pudo aplicar el efecto.";
     }
+});
+
+// ============================================================================
+// COMPARTIR AUDIO
+// ============================================================================
+
+btnCompartir.addEventListener("click", async () => {
+
+    if (!audioProcesadoActual) {
+        estado.textContent = "No hay audio para compartir.";
+        return;
+    }
+
+    try {
+
+        const archivo = new File(
+            [audioProcesadoActual],
+            "voz-loca.wav",
+            { type: "audio/wav" }
+        );
+
+        if (navigator.canShare && navigator.canShare({ files: [archivo] })) {
+
+            await navigator.share({
+                title: "Voz Loca",
+                text: "Escuchá este audio creado con Voz Loca",
+                files: [archivo]
+            });
+
+        } else {
+
+            estado.textContent =
+                "Tu navegador no permite compartir archivos.";
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
 });
 
 // ============================================================================

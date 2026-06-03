@@ -145,3 +145,8 @@ audio {
     color: white;
     background: #22c55e;
 }
+
+#btnCompartir {
+    background: #2563eb;
+    color: white;
+}
