@@ -1,4 +1,4 @@
-const CACHE_NAME = "voz-loca-v11";
+const CACHE_NAME = "voz-loca-v12";
 
 const FILES_TO_CACHE = [
   "./",

@@ -18,6 +18,7 @@ const btnArdilla = document.getElementById("btnArdilla");
 const audioEfecto = document.getElementById("audioEfecto");
 const btnAnciano = document.getElementById("btnAnciano");
 const btnCompartir = document.getElementById("btnCompartir");
+const btnRobot = document.getElementById("btnRobot");
 
 let audioBlobActual = null;
 let audioProcesadoActual = null;
@@ -54,6 +55,7 @@ btnGrabar.addEventListener("click", async () => {
             audioOriginal.src = audioUrl;
             btnArdilla.disabled = false;
             btnAnciano.disabled = false;
+            btnRobot.disabled = false;
 
             estado.textContent = "Grabación lista para reproducir";
             btnGrabar.disabled = false;
@@ -80,12 +82,14 @@ btnBorrar.addEventListener("click", () => {
     audioChunks = [];
     audioBlobActual = null;
     audioProcesadoActual = null;
-    btnCompartir.disabled = true;
+    
 
     estado.textContent = "Audio borrado. Listo para grabar otro.";
     btnBorrar.disabled = true;
     btnArdilla.disabled = true;
     btnAnciano.disabled = true;
+    btnRobot.disabled = true;
+    btnCompartir.disabled = true;
 });
 
 // =========================
@@ -197,6 +201,19 @@ function audioBufferToWav(buffer) {
         view.setUint32(pos, data, true);
         pos += 4;
     }
+}
+
+function crearDistorsionRobot(cantidad) {
+    const muestras = 44100;
+    const curva = new Float32Array(muestras);
+    const deg = Math.PI / 180;
+
+    for (let i = 0; i < muestras; i++) {
+        const x = (i * 2) / muestras - 1;
+        curva[i] = ((3 + cantidad) * x * 20 * deg) / (Math.PI + cantidad * Math.abs(x));
+    }
+
+    return curva;
 }
 
 // ============================================================================
@@ -335,6 +352,112 @@ btnCompartir.addEventListener("click", async () => {
 
     }
 
+});
+
+// ============================================================================
+// EFECTO ROBOT
+// ============================================================================
+
+btnRobot.addEventListener("click", async () => {
+    if (!audioBlobActual) {
+        estado.textContent = "Primero grabá un audio.";
+        return;
+    }
+
+    estado.textContent = "Aplicando efecto robot...";
+
+    try {
+        const arrayBuffer = await audioBlobActual.arrayBuffer();
+        const audioContext = new AudioContext();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const offlineContext = new OfflineAudioContext(
+            audioBuffer.numberOfChannels,
+            audioBuffer.length,
+            audioBuffer.sampleRate
+        );
+
+        const source = offlineContext.createBufferSource();
+        source.buffer = audioBuffer;
+
+        const highpass = offlineContext.createBiquadFilter();
+        highpass.type = "highpass";
+        highpass.frequency.value = 220;
+
+        const waveShaper = offlineContext.createWaveShaper();
+        waveShaper.curve = crearDistorsionRobot(85);
+        waveShaper.oversample = "4x";
+
+        const bandpass = offlineContext.createBiquadFilter();
+        bandpass.type = "bandpass";
+        bandpass.frequency.value = 1150;
+        bandpass.Q.value = 3.8;
+
+        const metalico = offlineContext.createBiquadFilter();
+        metalico.type = "peaking";
+        metalico.frequency.value = 1750;
+        metalico.Q.value = 6;
+        metalico.gain.value = 11;
+
+        const recorteAgudos = offlineContext.createBiquadFilter();
+        recorteAgudos.type = "lowpass";
+        recorteAgudos.frequency.value = 3600;
+
+        const moduladorRobot = offlineContext.createOscillator();
+        moduladorRobot.type = "square";
+        moduladorRobot.frequency.value = 46;
+
+        const profundidadRobot = offlineContext.createGain();
+        profundidadRobot.gain.value = 0.34;
+
+        const volumenRobot = offlineContext.createGain();
+        volumenRobot.gain.value = 0.44;
+
+        const delayMetalico = offlineContext.createDelay();
+        delayMetalico.delayTime.value = 0.026;
+
+        const feedbackMetalico = offlineContext.createGain();
+        feedbackMetalico.gain.value = 0.28;
+
+        const compresor = offlineContext.createDynamicsCompressor();
+        compresor.threshold.value = -18;
+        compresor.knee.value = 8;
+        compresor.ratio.value = 5;
+        compresor.attack.value = 0.003;
+        compresor.release.value = 0.16;
+
+        source.connect(highpass);
+        highpass.connect(waveShaper);
+        waveShaper.connect(bandpass);
+        bandpass.connect(metalico);
+        metalico.connect(recorteAgudos);
+        recorteAgudos.connect(volumenRobot);
+
+        moduladorRobot.connect(profundidadRobot);
+        profundidadRobot.connect(volumenRobot.gain);
+
+        volumenRobot.connect(compresor);
+        volumenRobot.connect(delayMetalico);
+        delayMetalico.connect(feedbackMetalico);
+        feedbackMetalico.connect(delayMetalico);
+        delayMetalico.connect(compresor);
+        compresor.connect(offlineContext.destination);
+
+        moduladorRobot.start(0);
+        source.start(0);
+
+        const renderedBuffer = await offlineContext.startRendering();
+        const wavBlob = audioBufferToWav(renderedBuffer);
+
+        audioProcesadoActual = wavBlob;
+        btnCompartir.disabled = false;
+
+        audioEfecto.src = URL.createObjectURL(wavBlob);
+        estado.textContent = "Efecto robot listo.";
+    } catch (error) {
+        console.error(error);
+        estado.textContent = "No se pudo aplicar el efecto robot.";
+    }
 });
 
 // ============================================================================
